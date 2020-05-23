@@ -8,8 +8,8 @@
   ],
   "typescript.tsdk": "node_modules/typescript/lib",
   "vetur.experimental.templateInterpolationService": true,
-  "editor.formatOnPaste": true,
-  "editor.formatOnSave": true,
+  // "editor.formatOnPaste": true,
+  // "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll": true
   },
