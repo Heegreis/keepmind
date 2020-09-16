@@ -70,8 +70,14 @@ export default {
         },
         {
           icon: 'warning',
-          label: 'test',
-          to: '/test',
+          label: 'testZip',
+          to: '/test-zip',
+          separator: false
+        },
+        {
+          icon: 'warning',
+          label: 'testDB',
+          to: '/test-db',
           separator: false
         }
       ]
