@@ -14,13 +14,13 @@ import fs from 'fs'
 import path from 'path'
 
 export default Vue.extend({
-  name: 'Map',
+  name: 'zip',
   mounted: function() {
-    fs.readFile(path.join(__statics, '/someFile.txt'), function(err, data) {
-    if (err) throw err
-    JSZip.loadAsync(data).then(function(zip) {
-      // ...
-      //   console.log(zip.files)
+    const zip = new JSZip()
+    zip.file('Hello.txt', 'Hello World\n')
+    zip.generateAsync({ type: 'blob' }).then(function(content) {
+      // see FileSaver.js
+      saveAs(content, 'example.zip')
     })
   }
 })
