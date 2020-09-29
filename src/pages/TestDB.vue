@@ -7,15 +7,13 @@
 <script lang="ts">
 import Vue from 'vue'
 
-import PouchDB from 'pouchdb'
+import { getDB, read } from 'components/punchdbTools'
 
 export default Vue.extend({
   name: 'DB',
   mounted: function() {
-    const db = new PouchDB('kittens')
-    db.info().then(function(info) {
-      console.log(info)
-    })
+    const db = getDB()
+    read(db)
   }
 })
 </script>
