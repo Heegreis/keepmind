@@ -26,17 +26,8 @@
       content-class="bg-grey-1"
     >
       <q-scroll-area class="fit">
-        <q-list
-          v-for="(menuItem, index) in menuList"
-          :key="index"
-        >
-
-          <q-item
-            :to="menuItem.to"
-            exact
-            clickable
-            v-ripple
-          >
+        <q-list v-for="(menuItem, index) in menuList" :key="index">
+          <q-item :to="menuItem.to" exact clickable v-ripple>
             <q-item-section avatar>
               <q-icon :name="menuItem.icon" />
             </q-item-section>
@@ -46,7 +37,6 @@
           </q-item>
 
           <q-separator v-if="menuItem.separator" />
-
         </q-list>
       </q-scroll-area>
     </q-drawer>
@@ -58,11 +48,10 @@
 </template>
 
 <script>
-
 export default {
   name: 'MainLayout',
 
-  data () {
+  data() {
     return {
       leftDrawerOpen: false,
       // menuList
@@ -77,6 +66,12 @@ export default {
           icon: 'send',
           label: 'map',
           to: '/map',
+          separator: false
+        },
+        {
+          icon: 'warning',
+          label: 'test',
+          to: '/test',
           separator: false
         }
       ]
