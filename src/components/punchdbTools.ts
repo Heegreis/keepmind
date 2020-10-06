@@ -11,7 +11,6 @@ export function getDB() {
 }
 
 export function read(db) {
-  /// read a zip file
   db.createIndex({
     index: { fields: ['doc_type'] }
   })
