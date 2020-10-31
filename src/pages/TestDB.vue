@@ -7,13 +7,22 @@
 <script lang="ts">
 import Vue from 'vue'
 
-import { getDB, read } from 'components/punchdbTools'
+import {
+  destroyDB,
+  getDB,
+  read,
+  showAll,
+  addTestNodeInfo
+} from 'components/punchdbTools'
 
 export default Vue.extend({
   name: 'DB',
   mounted: function() {
+    // destroyDB()
     const db = getDB()
-    read(db)
+    // read(db)
+    // addTestNodeInfo(db)
+    showAll(db)
   }
 })
 </script>
