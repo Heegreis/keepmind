@@ -12,7 +12,8 @@ import {
   getDB,
   read,
   showAll,
-  addTestNodeInfo
+  addTestNodeInfo,
+  getRootsID
 } from 'components/punchdbTools'
 
 export default Vue.extend({
@@ -20,7 +21,6 @@ export default Vue.extend({
   mounted: function() {
     // destroyDB()
     const db = getDB()
-    // read(db)
     // addTestNodeInfo(db)
     showAll(db)
   }

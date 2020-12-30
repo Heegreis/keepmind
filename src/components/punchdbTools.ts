@@ -44,21 +44,27 @@ export function read(db) {
     })
 }
 
-export function getRootsID(db) {
-  db.createIndex({
-    index: { fields: ['doc_type', 'parents'] }
-  })
-    .then(function() {
-      return db.find({
-        selector: {
-          docType: 'mindmap_info',
-          parents: []
-        }
+export async function getRootsID(db) {
+  const promise = new Promise(function(resolve, reject) {
+    db.createIndex({
+      index: { fields: ['docType', 'parents'] }
+    })
+      .then(function() {
+        db.find({
+          selector: {
+            docType: 'node',
+            parents: { $eq: [] }
+          }
+        }).then(function(result) {
+          result = result.docs.map(a => a._id)
+          resolve(result)
+        })
+      }).catch(function(err) {
+        reject(err)
       })
-    })
-    .then(function(docs) {
-      console.log(docs)
-    })
+  })
+  const result = await promise
+  return result
 }
 
 export function getNode(db, nodeID: string) {
@@ -66,16 +72,30 @@ export function getNode(db, nodeID: string) {
     console.log(doc)
   })
 }
+/*
+1
 
+1-1
+*/
 export function addTestNodeInfo(db) {
   db.post({
     docType: 'node',
     mindmapId: '1',
     parents: [],
     children: [],
-    content: '1',
+    content: '1-2',
     notes: '123'
   }).then(function(respond) {
+    db.post({
+      docType: 'node',
+      mindmapId: '1',
+      parents: [],
+      children: [],
+      content: '1-1',
+      notes: '112'
+    }).catch(function(err) {
+      console.log(err)
+    })
     db.post({
       docType: 'node',
       mindmapId: '1',
