@@ -5,7 +5,7 @@ PouchDB.plugin(PouchFind)
 export function getDB() {
   const db = new PouchDB('mindmaps')
   db.info().then(function(info) {
-    console.log(info)
+    // console.log(info)
   })
   return db
 }
@@ -67,10 +67,16 @@ export async function getRootsID(db) {
   return result
 }
 
-export function getNode(db, nodeID: string) {
-  db.get(nodeID).then(function(doc) {
-    console.log(doc)
+export async function getNode(db, nodeID: string) {
+  const promise = new Promise(function(resolve, reject) {
+    db.get(nodeID).then(function(doc) {
+      resolve(doc)
+    }).catch(function(err) {
+      reject(err)
+    })
   })
+  const result = await promise
+  return result
 }
 /*
 1
