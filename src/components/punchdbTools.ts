@@ -47,13 +47,13 @@ export function read(db) {
 export async function getRootsID(db) {
   const promise = new Promise(function(resolve, reject) {
     db.createIndex({
-      index: { fields: ['docType', 'parents'] }
+      index: { fields: ['docType', 'parent'] }
     })
       .then(function() {
         db.find({
           selector: {
             docType: 'node',
-            parents: { $eq: [] }
+            parent: { $eq: '' }
           }
         }).then(function(result) {
           result = result.docs.map(a => a._id)
@@ -139,7 +139,7 @@ export function addTestNodeInfo(db) {
   db.post({
     docType: 'node',
     mindmapId: '1',
-    parents: [],
+    parent: [],
     children: [],
     content: '1-2',
     notes: '123'
@@ -147,7 +147,7 @@ export function addTestNodeInfo(db) {
     db.post({
       docType: 'node',
       mindmapId: '1',
-      parents: [],
+      parent: [],
       children: [],
       content: '1-1',
       notes: '112'
@@ -157,7 +157,7 @@ export function addTestNodeInfo(db) {
     db.post({
       docType: 'node',
       mindmapId: '1',
-      parents: [respond.id],
+      parent: [respond.id],
       children: [],
       content: '2-2',
       notes: '456'
@@ -168,7 +168,7 @@ export function addTestNodeInfo(db) {
       node: db.post({
         docType: 'node',
         mindmapId: '1',
-        parents: [respond.id],
+        parent: [respond.id],
         children: [],
         content: '2-1',
         notes: '456'
@@ -181,7 +181,7 @@ export function addTestNodeInfo(db) {
       db.post({
         docType: 'node',
         mindmapId: '1',
-        parents: [respond.id],
+        parent: [respond.id],
         children: [],
         content: '3-1',
         notes: '789'
@@ -207,7 +207,7 @@ export function addTestNodeInfo(db) {
     "docType": "node",
     "mindmapId": "所屬 mindmapId",
     "_id": "預設隨機UUID",
-    "parents": [],
+    "parent": '',
     "children": ["2"],
     "content": "11",
     "notes": "123"
@@ -216,7 +216,7 @@ export function addTestNodeInfo(db) {
     "docType": "node",
     "mindmapId": "所屬 mindmapId",
     "_id": "預設隨機UUID",
-    "parents": ["1"],
+    "parent": "1",
     "children": [],
     "content": "22",
     "notes": "456"

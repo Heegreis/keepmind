@@ -4,10 +4,10 @@
       <svg>
         <g id="canvas">
           <node
-            v-for="root in roots"
-            :key="root"
+            v-for="rootID in rootsID"
+            :key="rootID"
             v-bind:db="db"
-            v-bind:nodeID="root"
+            v-bind:nodeID="rootID"
           ></node>
         </g>
       </svg>
@@ -40,15 +40,13 @@ export default Vue.extend({
         { x: 100, y: 30 }
       ],
       db: {},
-      roots: []
+      rootsID: []
     }
   },
   created: function() {
     this.loadDB()
-    // console.log(getRootsID(this.db))
     getRootsID(this.db).then(result => {
-      // console.log(result)
-      this.roots = result
+      this.rootsID = result
     })
   },
   mounted: function() {

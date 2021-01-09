@@ -3,9 +3,15 @@
     <foreignObject>
       <div>node: {{ nodeID }}</div>
       <div>mindmapId: {{ data.mindmapId }}</div>
+      <div>content: {{ data.content }}</div>
     </foreignObject>
     <g v-if="data.children && data.children.length">
-      <node v-for="child in children" v-bind:key="child"></node>
+      <node
+        v-for="child in data.children"
+        :key="child"
+        v-bind:db="db"
+        v-bind:nodeID="child"
+      ></node>
     </g>
   </g>
 </template>
@@ -34,8 +40,6 @@ export default {
   },
   data: function() {
     return {
-      content: '',
-      children: [],
       data: {}
     }
   },
