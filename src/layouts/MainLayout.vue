@@ -79,6 +79,12 @@ export default {
           label: 'testDB',
           to: '/test-db',
           separator: false
+        },
+        {
+          icon: 'account_tree',
+          label: 'tree',
+          to: '/tree',
+          separator: false
         }
       ]
     }

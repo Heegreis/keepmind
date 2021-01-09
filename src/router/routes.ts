@@ -8,7 +8,8 @@ const routes: RouteConfig[] = [
       { path: '', component: () => import('pages/Index.vue') },
       { path: '/map', component: () => import('pages/Map.vue') },
       { path: '/test-zip', component: () => import('pages/TestZip.vue') },
-      { path: '/test-db', component: () => import('pages/TestDB.vue') }
+      { path: '/test-db', component: () => import('pages/TestDB.vue') },
+      { path: '/tree', component: () => import('pages/Tree.vue') }
     ]
   }
 ]

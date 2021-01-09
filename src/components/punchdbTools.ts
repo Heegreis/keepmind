@@ -67,6 +67,28 @@ export async function getRootsID(db) {
   return result
 }
 
+export async function getAllNodes(db) {
+  const promise = new Promise(function(resolve, reject) {
+    db.createIndex({
+      index: { fields: ['docType'] }
+    })
+      .then(function() {
+        db.find({
+          selector: {
+            docType: 'node'
+          }
+        }).then(function(result) {
+          result = result.docs
+          resolve(result)
+        })
+      }).catch(function(err) {
+        reject(err)
+      })
+  })
+  const result = await promise
+  return result
+}
+
 export async function getNode(db, nodeID: string) {
   const promise = new Promise(function(resolve, reject) {
     db.get(nodeID).then(function(doc) {
@@ -78,11 +100,41 @@ export async function getNode(db, nodeID: string) {
   const result = await promise
   return result
 }
+
+export function addChildToParentNode(db, nodeID: string, childID: string) {
+  db.get(nodeID).then(function(doc) {
+    doc.children.push(childID)
+    return db.put(doc)
+  }).then(function(respond) {
+    console.log(respond)
+  }).catch(function(err) {
+    console.log(err)
+  })
+}
 /*
 1
 
 1-1
 */
+export function addNode(db, parentID: string, inputContent: string, inputNotes: string) {
+  db.post({
+    docType: 'node',
+    mindmapId: '1',
+    parent: parentID,
+    children: [],
+    content: inputContent,
+    notes: inputNotes
+  }).then(function(respond) {
+    console.log(respond)
+    const childID = respond.id
+    if (parentID !== '') {
+      return addChildToParentNode(db, parentID, childID)
+    }
+  }).catch(function(err) {
+    console.log(err)
+  })
+}
+
 export function addTestNodeInfo(db) {
   db.post({
     docType: 'node',

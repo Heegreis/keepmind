@@ -19,10 +19,10 @@ import {
 export default Vue.extend({
   name: 'DB',
   mounted: function() {
-    // destroyDB()
-    const db = getDB()
+    destroyDB()
+    // const db = getDB()
     // addTestNodeInfo(db)
-    showAll(db)
+    // showAll(db)
   }
 })
 </script>
