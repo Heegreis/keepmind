@@ -1,9 +1,11 @@
 <template>
   <g id="node">
-    <foreignObject>
-      <div>node: {{ nodeID }}</div>
-      <div>mindmapId: {{ data.mindmapId }}</div>
-      <div>content: {{ data.content }}</div>
+    <foreignObject width="1" height="1">
+      <div ref="nodeContent" class="nodeContent">
+        <div>node: {{ nodeID }}</div>
+        <div>mindmapId: {{ data.mindmapId }}</div>
+        <div>content: {{ data.content }}</div>
+      </div>
     </foreignObject>
     <g v-if="data.children && data.children.length">
       <node
@@ -46,8 +48,17 @@ export default {
   created: function() {
     getNode(this.db, this.nodeID).then(result => {
       this.data = result
-      console.log(result)
     })
+  },
+  mounted: function() {
+    // console.log(this.data.content)
+    // console.log(this.$refs.nodeContent.clientWidth)
+    // console.log(this.$refs.nodeContent.clientHeight)
+  },
+  updated: function() {
+    // console.log(this.data.content)
+    // console.log(this.$refs.nodeContent.clientWidth)
+    // console.log(this.$refs.nodeContent.clientHeight)
   },
   methods: {
     getNodeInfo() {
@@ -68,4 +79,14 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+foreignObject {
+  overflow: visible;
+}
+.nodeContent {
+  border: 1px #ffac55 solid;
+  // background-color: blueviolet;
+  white-space: nowrap;
+  display: inline-block;
+}
+</style>
