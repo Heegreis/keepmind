@@ -1,7 +1,7 @@
 <template>
   <g id="node">
-    <foreignObject width="1" height="1">
-      <div ref="nodeContent" class="nodeContent">
+    <foreignObject width="1" height="1" id="nodeForeignObject">
+      <div ref="nodeContent" id="nodeContent">
         <div>node: {{ nodeID }}</div>
         <div>mindmapId: {{ data.mindmapId }}</div>
         <div>content: {{ data.content }}</div>
@@ -20,6 +20,7 @@
 
 <script lang="ts">
 // import { defineComponent, PropType, computed, ref } from '@vue/composition-api'
+import * as d3 from 'd3'
 import { getRootsID, getNode } from 'components/punchdbTools'
 // Node排版: 主要用g包裝
 // g
@@ -54,6 +55,28 @@ export default {
     // console.log(this.data.content)
     // console.log(this.$refs.nodeContent.clientWidth)
     // console.log(this.$refs.nodeContent.clientHeight)
+    const drag = d3
+      .drag()
+      .container(function container() {
+        // console.log(this.parentNode.parentNode)
+        return this.parentNode.parentNode
+      })
+      .on('start', function() {
+        // d3.select(this).attr({ fill: 'black' })
+        // console.log('start')
+      })
+      .on('drag', function() {
+        console.log(d3.event.subject)
+        d3.select(this.parentNode).attr(
+          'transform',
+          `translate(${d3.event.x},${d3.event.y})`
+        )
+      })
+      .on('end', function() {
+        // d3.select(this).attr({ fill: d.fill })
+        // console.log('end')
+      })
+    d3.selectAll('#nodeForeignObject').call(drag)
   },
   updated: function() {
     // console.log(this.data.content)
@@ -83,7 +106,7 @@ export default {
 foreignObject {
   overflow: visible;
 }
-.nodeContent {
+#nodeContent {
   border: 1px #ffac55 solid;
   // background-color: blueviolet;
   white-space: nowrap;
