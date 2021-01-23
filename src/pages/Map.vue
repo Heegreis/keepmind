@@ -11,6 +11,9 @@
           ></node>
         </g>
       </svg>
+      <div>
+        <q-btn label="reset" @click="restBtn" />
+      </div>
     </div>
   </q-page>
 </template>
@@ -40,7 +43,8 @@ export default Vue.extend({
         { x: 100, y: 30 }
       ],
       db: {},
-      rootsID: []
+      rootsID: [],
+      zoom: {}
     }
   },
   created: function() {
@@ -88,6 +92,18 @@ export default Vue.extend({
     //   .attr('fill', 'none')
     // this.loadData(canvas)
     // console.log(this.data)
+
+    function zoomed() {
+      const container = d3.select('#canvas')
+      container.attr('transform', d3.event.transform)
+    }
+    this.zoom = d3
+      .zoom()
+      .scaleExtent([1, 10])
+      .on('zoom', zoomed)
+    d3.select('#Map')
+      .select('svg')
+      .call(this.zoom)
   },
   methods: {
     loadData(canvas) {
@@ -109,6 +125,14 @@ export default Vue.extend({
     },
     loadDB() {
       this.db = getDB()
+    },
+    restBtn() {
+      console.log('restBtn')
+      d3.select('#Map')
+        .select('svg')
+        .transition()
+        .duration(750)
+        .call(this.zoom.transform, d3.zoomIdentity)
     }
   }
 })
@@ -118,9 +142,12 @@ export default Vue.extend({
 #Map {
   width: 100%;
   min-height: inherit;
+  display: flex;
+  flex-direction: column;
 }
 svg {
   width: 100%;
-  min-height: inherit;
+  // min-height: initial;
+  flex: 1;
 }
 </style>
