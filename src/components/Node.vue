@@ -1,10 +1,16 @@
 <template>
-  <g id="node">
+  <g
+    ref="node"
+    id="node"
+    v-bind:transform="`translate(${translate.x},${translate.y})`"
+  >
+    <path v-if="!isRoot" ref="nodePath"></path>
     <foreignObject width="1" height="1" id="nodeForeignObject">
       <div ref="nodeContent" id="nodeContent">
-        <div>node: {{ nodeID }}</div>
-        <div>mindmapId: {{ data.mindmapId }}</div>
-        <div>content: {{ data.content }}</div>
+        <!-- <div>node: {{ nodeID }}</div> -->
+        <!-- <div>mindmapId: {{ data.mindmapId }}</div> -->
+        <!-- <div>content: {{ data.content }}</div> -->
+        <div>{{ data.content }}</div>
       </div>
     </foreignObject>
     <g v-if="data.children && data.children.length">
@@ -13,6 +19,7 @@
         :key="child"
         v-bind:db="db"
         v-bind:nodeID="child"
+        v-bind:parentSize="size"
       ></node>
     </g>
   </g>
@@ -22,6 +29,7 @@
 // import { defineComponent, PropType, computed, ref } from '@vue/composition-api'
 import * as d3 from 'd3'
 import { getRootsID, getNode } from 'components/punchdbTools'
+import { event } from 'quasar'
 // Node排版: 主要用g包裝
 // g
 //   path
@@ -39,22 +47,39 @@ export default {
       type: String,
       default: ''
       // required: true
-    }
+    },
+    parentSize: {}
   },
   data: function() {
     return {
-      data: {}
+      data: {},
+      isRoot: true,
+      translate: { x: 50, y: 50 },
+      size: { width: 0, height: 0 },
+      line: [
+        { x: 0, y: 0 },
+        { x: 0, y: 0 }
+      ],
+      setLine: d3
+        .line()
+        .x(function(d) {
+          return d.x
+        })
+        .y(function(d) {
+          return d.y
+        })
     }
   },
   created: function() {
     getNode(this.db, this.nodeID).then(result => {
       this.data = result
+      if (this.data.parent) {
+        this.isRoot = false
+      }
     })
+    console.log('created fin')
   },
   mounted: function() {
-    // console.log(this.data.content)
-    // console.log(this.$refs.nodeContent.clientWidth)
-    // console.log(this.$refs.nodeContent.clientHeight)
     const drag = d3
       .drag()
       .container(function container() {
@@ -65,23 +90,27 @@ export default {
         // d3.select(this).attr({ fill: 'black' })
         // console.log('start')
       })
-      .on('drag', function() {
-        console.log(d3.event.subject)
-        d3.select(this.parentNode).attr(
-          'transform',
-          `translate(${d3.event.x},${d3.event.y})`
-        )
-      })
+      .on('drag', (event, d) => this.drag_drag(event, d))
       .on('end', function() {
         // d3.select(this).attr({ fill: d.fill })
         // console.log('end')
       })
-    d3.selectAll('#nodeForeignObject').call(drag)
+    d3.select(this.$refs.node).call(drag)
   },
   updated: function() {
-    // console.log(this.data.content)
-    // console.log(this.$refs.nodeContent.clientWidth)
-    // console.log(this.$refs.nodeContent.clientHeight)
+    this.size.width = this.$refs.nodeContent.clientWidth
+    this.size.height = this.$refs.nodeContent.clientHeight
+    this.line[0].y = this.size.height / 2
+    if (this.parentSize) {
+      this.line[1].x = -this.translate.x + this.parentSize.width
+      this.line[1].y = -this.translate.y + this.parentSize.height / 2
+    }
+    d3.select(this.$refs.nodePath)
+      .attr('d', this.setLine(this.line))
+      .attr('y', 0)
+      .attr('stroke', 'red')
+      .attr('stroke-width', '5px')
+      .attr('fill', 'none')
   },
   methods: {
     getNodeInfo() {
@@ -97,6 +126,15 @@ export default {
       //   getNode(this.db, this.nodeID)
       //   console.log('showNodeInfo')
       // }
+    },
+    drag_drag(event, d) {
+      this.translate.x += d3.event.dx
+      this.translate.y += d3.event.dy
+
+      if (this.parentSize) {
+        this.line[1].x = -this.translate.x + this.parentSize.width
+        this.line[1].y = -this.translate.y + this.parentSize.height / 2
+      }
     }
   }
 }

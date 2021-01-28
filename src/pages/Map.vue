@@ -90,8 +90,6 @@ export default Vue.extend({
     //   })
     //   .attr('stroke', '#ddd')
     //   .attr('fill', 'none')
-    // this.loadData(canvas)
-    // console.log(this.data)
 
     function zoomed() {
       const container = d3.select('#canvas')
@@ -106,23 +104,6 @@ export default Vue.extend({
       .call(this.zoom)
   },
   methods: {
-    loadData(canvas) {
-      const line = d3
-        .line()
-        .x(function(d) {
-          return d.x
-        })
-        .y(function(d) {
-          return d.y
-        })
-      canvas
-        .append('path')
-        .attr('d', line(this.data))
-        .attr('y', 0)
-        .attr('stroke', '#000')
-        .attr('stroke-width', '5px')
-        .attr('fill', 'none')
-    },
     loadDB() {
       this.db = getDB()
     },
@@ -147,7 +128,6 @@ export default Vue.extend({
 }
 svg {
   width: 100%;
-  // min-height: initial;
   flex: 1;
 }
 </style>
