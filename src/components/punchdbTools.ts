@@ -1,5 +1,6 @@
 import PouchDB from 'pouchdb'
 import PouchFind from 'pouchdb-find'
+import { setChildToNodes } from 'components/jsonTools'
 PouchDB.plugin(PouchFind)
 
 export function getDB() {
@@ -25,22 +26,6 @@ export function showAll(db) {
       console.log(response.rows)
     }).catch(function(err) {
       console.log(err)
-    })
-}
-
-export function read(db) {
-  db.createIndex({
-    index: { fields: ['doc_type'] }
-  })
-    .then(function() {
-      return db.find({
-        selector: {
-          doc_type: 'mindmap_info'
-        }
-      })
-    })
-    .then(function(docs) {
-      console.log(docs)
     })
 }
 
@@ -89,6 +74,55 @@ export async function getAllNodes(db) {
   return result
 }
 
+export function addMindMap(db, name: string) {
+  db.post({
+    docType: 'mindMap',
+    name: name,
+    nodes: []
+  }).then(function(respond) {
+    console.log(respond)
+  }).catch(function(err) {
+    console.log(err)
+  })
+}
+
+export async function getAllMindMaps(db) {
+  const promise = new Promise(function(resolve, reject) {
+    db.createIndex({
+      index: { fields: ['docType'] }
+    })
+      .then(function() {
+        db.find({
+          selector: {
+            docType: 'mindMap'
+          }
+        }).then(function(result) {
+          result = result.docs
+          resolve(result)
+        })
+      }).catch(function(err) {
+        reject(err)
+      })
+  })
+  const result = await promise
+  return result
+}
+
+export async function getNodeStructure(db, mapID: string) {
+  const promise = new Promise(function(resolve, reject) {
+    db.get(mapID).then(function(result) {
+      result = result.nodes
+      console.log('getNodeStructure')
+      console.log(result)
+      resolve(result)
+    }).catch(function(err) {
+      reject(err)
+    })
+  })
+  const result = await promise
+  return result
+}
+
 export async function getNode(db, nodeID: string) {
   const promise = new Promise(function(resolve, reject) {
     db.get(nodeID).then(function(doc) {
@@ -116,23 +150,66 @@ export function addChildToParentNode(db, nodeID: string, childID: string) {
 
 1-1
 */
-export function addNode(db, parentID: string, inputContent: string, inputNotes: string) {
-  db.post({
-    docType: 'node',
-    mindmapId: '1',
-    parent: parentID,
-    children: [],
-    content: inputContent,
-    notes: inputNotes
-  }).then(function(respond) {
-    console.log(respond)
-    const childID = respond.id
-    if (parentID !== '') {
-      return addChildToParentNode(db, parentID, childID)
-    }
-  }).catch(function(err) {
-    console.log(err)
+export async function setChildNodeToMindMap(db, mindMapID: string, parentID: string, nodeID: string) {
+  const promise = new Promise(function(resolve, reject) {
+    db.get(mindMapID).then(function(doc) {
+      const newNodes = setChildToNodes(doc.nodes, parentID, nodeID)
+      doc.nodes = newNodes
+      return db.put(doc)
+    }).then(function(respond) {
+      resolve(respond)
+    }).catch(function(err) {
+      reject(err)
+    })
   })
+  const result = await promise
+  return result
+}
+
+export async function setRootNodeToMindMap(db, mindMapID: string, nodeID: string) {
+  const promise = new Promise(function(resolve, reject) {
+    db.get(mindMapID).then(function(doc) {
+      const node = { id: mindMapID, children: [] }
+      doc.nodes.push(node)
+      return db.put(doc)
+    }).then(function(respond) {
+      console.log(respond)
+      resolve(respond)
+    }).catch(function(err) {
+      console.log(err)
+      reject(err)
+    })
+  })
+  const result = await promise
+  return result
+}
+
+export async function addNode(db, mindMapID: string, parentID: string, inputContent: string, inputNotes: string) {
+  const promise = new Promise(function(resolve, reject) {
+    db.post({
+      docType: 'node',
+      content: inputContent,
+      notes: inputNotes
+    }).then(function(respond) {
+      console.log(respond)
+      const nodeID = respond.id
+      if (parentID !== '') {
+        setChildNodeToMindMap(db, mindMapID, parentID, nodeID).then(result => {
+          resolve(result)
+        })
+      } else {
+        setRootNodeToMindMap(db, mindMapID, nodeID).then(result => {
+          resolve(result)
+        })
+      }
+      // resolve(doc)
+    }).catch(function(err) {
+      console.log(err)
+      reject(err)
+    })
+  })
+  const result = await promise
+  return { db, mindMapID }
 }
 
 export function addTestNodeInfo(db) {
@@ -204,11 +281,22 @@ export function addTestNodeInfo(db) {
     "mapName": "範例1"
   },
   {
+    " docType": "mindmap_info",
+    "_id": "預設隨機UUID",
+    "mapName": "範例1"
+    "nodes": [
+      {
+        "id": "nodeID-1",
+        "children": [
+          {"id": "nodeID-1-1"}
+        ]
+      },
+    ]
+  },
+  {
     "docType": "node",
-    "mindmapId": "所屬 mindmapId",
     "_id": "預設隨機UUID",
     "parent": '',
-    "children": ["2"],
     "content": "11",
     "notes": "123"
   },

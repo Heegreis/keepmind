@@ -1,15 +1,42 @@
 <template>
   <div class="q-pa-md row q-col-gutter-sm">
+    <div class="q-pa-md">
+      <div class="q-gutter-sm">
+        <q-radio
+          v-for="mindMap in mindMaps"
+          :key="mindMap._id"
+          v-model="selectedMindMap"
+          :val="mindMap._id"
+          :label="mindMap.name"
+        />
+      </div>
+
+      <div class="q-px-sm">
+        Your selection is: <strong>{{ selectedMindMap }}</strong>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 q-gutter-sm">
+      <div class="text-h6">Selected</div>
+      <div>{{ selectedMindMap }}</div>
+
+      <q-separator spaced />
+      <q-btn label="add" @click="addMindMapBtn" />
+      <q-btn label="delete" />
+      <q-btn label="edit" />
+      <q-input v-model="inputMindMapName" label="name" />
+    </div>
+
     <q-tree
       class="col-12 col-sm-6"
       :nodes="treeData"
-      node-key="_id"
+      node-key="id"
       :selected.sync="selected"
       default-expand-all
     >
       <template v-slot:default-header="prop">
         <div class="row items-center">
-          <div>{{ prop.node.content }}</div>
+          <div>{{ prop.node.id }}</div>
         </div>
       </template>
     </q-tree>
@@ -19,7 +46,7 @@
       <div>{{ selected }}</div>
 
       <q-separator spaced />
-      <q-btn label="add" @click="addBtn" />
+      <q-btn label="add" @click="addNodeBtn" />
       <q-btn label="delete" />
       <q-btn label="edit" />
       <q-input v-model="inputContent" label="content" />
@@ -35,7 +62,10 @@ import {
   getDB,
   getRootsID,
   addNode,
-  getAllNodes
+  getAllNodes,
+  getAllMindMaps,
+  addMindMap,
+  getNodeStructure
 } from 'components/punchdbTools'
 import Node from 'components/Node.vue'
 
@@ -47,6 +77,9 @@ export default Vue.extend({
   data: function() {
     return {
       db: {},
+      mindMaps: [],
+      selectedMindMap: '',
+      inputMindMapName: '',
       nodes: [],
       treeData: [],
       simple: [
@@ -108,13 +141,21 @@ export default Vue.extend({
       inputNotes: ''
     }
   },
+  computed: {},
+  watch: {
+    // 如果 `question` 发生改变，这个函数就会运行
+    selectedMindMap: function(newValue, oldValue) {
+      if (this.selectedMindMap) {
+        getNodeStructure(this.db, this.selectedMindMap).then(result => {
+          this.treeData = result
+        })
+      }
+    }
+  },
   created: function() {
     this.loadDB()
-    getAllNodes(this.db).then(result => {
-      console.log('ori')
-      console.log(result)
-      this.nodes = result
-      this.treeData = this.sortNodeData(this.nodes)
+    getAllMindMaps(this.db).then(result => {
+      this.mindMaps = result
     })
   },
   mounted: function() {},
@@ -122,15 +163,33 @@ export default Vue.extend({
     loadDB() {
       this.db = getDB()
     },
-    addBtn() {
-      console.log('add btn')
+    addMindMapBtn() {
+      if (this.selectedMindMap === null) {
+        this.selectedMindMap = ''
+      }
+      addMindMap(this.db, this.inputMindMapName)
+      getAllMindMaps(this.db).then(result => {
+        this.mindMaps = result
+      })
+    },
+    addNodeBtn() {
       if (this.selected === null) {
         this.selected = ''
       }
-      addNode(this.db, this.selected, this.inputContent, this.inputNotes)
-      getAllNodes(this.db).then(result => {
-        this.nodes = result
-        this.treeData = this.sortNodeData(this.nodes)
+      addNode(
+        this.db,
+        this.selectedMindMap,
+        this.selected,
+        this.inputContent,
+        this.inputNotes
+      ).then(d => {
+        getNodeStructure(d.db, d.mindMapID).then(result => {
+          // this.nodes = result
+          // this.treeData = this.nodes
+          this.treeData = result
+          // this.treeData = this.sortNodeData(this.nodes)
+        })
+        return d
       })
     },
     sortNodeData(NodeData) {
