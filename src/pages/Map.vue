@@ -4,10 +4,11 @@
       <svg>
         <g id="canvas">
           <node
-            v-for="rootID in rootsID"
-            :key="rootID"
+            v-for="node in nodes"
+            v-bind:key="node.id"
             v-bind:db="db"
-            v-bind:nodeID="rootID"
+            v-bind:node="node"
+            v-bind:isRoot="true"
           ></node>
         </g>
       </svg>
@@ -21,7 +22,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import * as d3 from 'd3'
-import { getDB, getRootsID } from 'components/punchdbTools'
+import { getDB, getMindMap } from 'components/punchdbTools'
 import Node from 'components/Node.vue'
 
 // 先搜尋根節點(parents為空)，在mounted()先搜尋一次，填入root資訊到template，啟動root Node
@@ -36,61 +37,24 @@ export default Vue.extend({
   },
   data: function() {
     return {
-      data: [
-        { x: 10, y: 10 },
-        { x: 50, y: 100 },
-        { x: 60, y: 50 },
-        { x: 100, y: 30 }
-      ],
       db: {},
       rootsID: [],
+      mindMap: {},
       zoom: {}
+    }
+  },
+  computed: {
+    nodes: function() {
+      return this.mindMap.nodes
     }
   },
   created: function() {
     this.loadDB()
-    getRootsID(this.db).then(result => {
-      this.rootsID = result
+    getMindMap(this.db, 'afaf50ab-f1bf-41b2-8b27-9e27546cd68c').then(result => {
+      this.mindMap = result
     })
   },
   mounted: function() {
-    // const svg = d3.select('#Map').select('svg')
-    // const canvas = d3.select('#canvas')
-    // const w = 800
-    // const h = 400
-    // canvas
-    //   .append('g')
-    //   .selectAll('line')
-    //   .data(d3.range(0, w, 30))
-    //   .enter()
-    //   .append('line')
-    //   .attr('x1', function(d) {
-    //     return d
-    //   })
-    //   .attr('y1', 0)
-    //   .attr('x2', function(d) {
-    //     return d
-    //   })
-    //   .attr('y2', h)
-    //   .attr('stroke', '#ddd')
-    //   .attr('fill', 'none')
-    // canvas
-    //   .append('g')
-    //   .selectAll('line')
-    //   .data(d3.range(0, h, 30))
-    //   .enter()
-    //   .append('line')
-    //   .attr('x1', 0)
-    //   .attr('y1', function(d) {
-    //     return d
-    //   })
-    //   .attr('x2', w)
-    //   .attr('y2', function(d) {
-    //     return d
-    //   })
-    //   .attr('stroke', '#ddd')
-    //   .attr('fill', 'none')
-
     function zoomed() {
       const container = d3.select('#canvas')
       container.attr('transform', d3.event.transform)

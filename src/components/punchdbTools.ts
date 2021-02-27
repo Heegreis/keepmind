@@ -108,6 +108,18 @@ export async function getAllMindMaps(db) {
   return result
 }
 
+export async function getMindMap(db, mindMapID: string) {
+  const promise = new Promise(function(resolve, reject) {
+    db.get(mindMapID).then(function(doc) {
+      resolve(doc)
+    }).catch(function(err) {
+      reject(err)
+    })
+  })
+  const result = await promise
+  return result
+}
+
 export async function getNodeStructure(db, mapID: string) {
   const promise = new Promise(function(resolve, reject) {
     db.get(mapID).then(function(result) {
@@ -169,7 +181,7 @@ export async function setChildNodeToMindMap(db, mindMapID: string, parentID: str
 export async function setRootNodeToMindMap(db, mindMapID: string, nodeID: string) {
   const promise = new Promise(function(resolve, reject) {
     db.get(mindMapID).then(function(doc) {
-      const node = { id: mindMapID, children: [] }
+      const node = { id: nodeID, children: [] }
       doc.nodes.push(node)
       return db.put(doc)
     }).then(function(respond) {

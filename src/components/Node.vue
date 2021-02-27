@@ -13,12 +13,12 @@
         <div>{{ data.content }}</div>
       </div>
     </foreignObject>
-    <g v-if="data.children && data.children.length">
+    <g v-if="children && children.length">
       <node
-        v-for="child in data.children"
-        :key="child"
+        v-for="child in children"
+        v-bind:key="child.id"
         v-bind:db="db"
-        v-bind:nodeID="child"
+        v-bind:node="child"
         v-bind:parentSize="size"
       ></node>
     </g>
@@ -43,17 +43,19 @@ export default {
   name: 'Node',
   props: {
     db: {},
-    nodeID: {
-      type: String,
-      default: ''
-      // required: true
+    node: {
+      type: Object,
+      required: true
+    },
+    isRoot: {
+      type: Boolean,
+      default: false
     },
     parentSize: {}
   },
   data: function() {
     return {
       data: {},
-      isRoot: true,
       translate: { x: 50, y: 50 },
       size: { width: 0, height: 0 },
       line: [
@@ -70,12 +72,17 @@ export default {
         })
     }
   },
+  computed: {
+    nodeID: function() {
+      return this.node.id
+    },
+    children: function() {
+      return this.node.children
+    }
+  },
   created: function() {
     getNode(this.db, this.nodeID).then(result => {
       this.data = result
-      if (this.data.parent) {
-        this.isRoot = false
-      }
     })
     console.log('created fin')
   },
@@ -83,8 +90,8 @@ export default {
     const drag = d3
       .drag()
       .container(function container() {
-        // console.log(this.parentNode.parentNode)
-        return this.parentNode.parentNode
+        // console.log(this.parentNode.parentNode.parentNode.parentNode)
+        return this.parentNode.parentNode.parentNode.parentNode
       })
       .on('start', function() {
         // d3.select(this).attr({ fill: 'black' })
@@ -95,7 +102,7 @@ export default {
         // d3.select(this).attr({ fill: d.fill })
         // console.log('end')
       })
-    d3.select(this.$refs.node).call(drag)
+    d3.select(this.$refs.nodeContent).call(drag)
   },
   updated: function() {
     this.size.width = this.$refs.nodeContent.clientWidth
