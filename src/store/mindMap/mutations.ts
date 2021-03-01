@@ -1,9 +1,16 @@
 import { MutationTree } from 'vuex'
-import { ExampleStateInterface } from './state'
+import { MindMapStateInterface } from './state'
+import Vue from 'vue'
 
-const mutation: MutationTree<ExampleStateInterface> = {
-  someMutation (/* state: ExampleStateInterface */) {
+const mutation: MutationTree<MindMapStateInterface> = {
+  someMutation(/* state: ExampleStateInterface */) {
     // your code
+  },
+  updateContentSize(state: MindMapStateInterface, payload) {
+    Vue.set(state.contentSize, payload.id, payload.size)
+  },
+  updateNodeBlockSize(state: MindMapStateInterface, payload) {
+    Vue.set(state.nodeBlockSize, payload.id, payload.size)
   }
 }
 

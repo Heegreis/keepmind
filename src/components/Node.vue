@@ -15,11 +15,12 @@
     </foreignObject>
     <g v-if="children && children.length">
       <node
-        v-for="child in children"
+        v-for="(child, index) in children"
         v-bind:key="child.id"
         v-bind:db="db"
         v-bind:node="child"
         v-bind:parentSize="size"
+        v-bind:oriTranslate="childrenTranslate[index]"
       ></node>
     </g>
   </g>
@@ -51,7 +52,10 @@ export default {
       type: Boolean,
       default: false
     },
-    parentSize: {}
+    parentSize: {},
+    oriTranslate: {
+      type: Number
+    }
   },
   data: function() {
     return {
@@ -69,7 +73,8 @@ export default {
         })
         .y(function(d) {
           return d.y
-        })
+        }),
+      draging: false
     }
   },
   computed: {
@@ -78,6 +83,16 @@ export default {
     },
     children: function() {
       return this.node.children
+    },
+    childrenTranslate: function() {
+      let childrenSize = 0
+      const childrenTranslate = []
+      for (let index = 0; index < this.children.length; index++) {
+        const child = this.children[index]
+        childrenTranslate.push(childrenSize)
+        childrenSize += this.$store.getters['mindMap/nodeBlockSize'](child.id)
+      }
+      return childrenTranslate
     }
   },
   created: function() {
@@ -97,16 +112,21 @@ export default {
         // d3.select(this).attr({ fill: 'black' })
         // console.log('start')
       })
-      .on('drag', (event, d) => this.drag_drag(event, d))
-      .on('end', function() {
-        // d3.select(this).attr({ fill: d.fill })
-        // console.log('end')
-      })
+      .on('drag', (event, d) => this.dragDrag(event, d))
+      .on('end', (event, d) => this.dragEnd(event, d))
     d3.select(this.$refs.nodeContent).call(drag)
   },
   updated: function() {
     this.size.width = this.$refs.nodeContent.clientWidth
     this.size.height = this.$refs.nodeContent.clientHeight
+    this.$store.commit('mindMap/updateContentSize', {
+      id: this.nodeID,
+      size: Object.assign({}, this.size)
+    })
+    this.updateNodeBlockSize()
+    if (!this.draging) {
+      this.translate.y = this.oriTranslate
+    }
     this.line[0].y = this.size.height / 2
     if (this.parentSize) {
       this.line[1].x = -this.translate.x + this.parentSize.width
@@ -134,7 +154,7 @@ export default {
       //   console.log('showNodeInfo')
       // }
     },
-    drag_drag(event, d) {
+    dragDrag(event, d) {
       this.translate.x += d3.event.dx
       this.translate.y += d3.event.dy
 
@@ -142,6 +162,27 @@ export default {
         this.line[1].x = -this.translate.x + this.parentSize.width
         this.line[1].y = -this.translate.y + this.parentSize.height / 2
       }
+      this.draging = true
+    },
+    dragEnd(event, d) {
+      this.draging = false
+    },
+    updateNodeBlockSize() {
+      let childrenSize = 0
+      for (let index = 0; index < this.children.length; index++) {
+        const child = this.children[index]
+        childrenSize += this.$store.getters['mindMap/nodeBlockSize'](child.id)
+      }
+      console.log(childrenSize)
+      if (this.size.height > childrenSize) {
+        const nodeBlockSize = this.size.height
+      } else {
+        const nodeBlockSize = childrenSize
+      }
+      this.$store.commit('mindMap/updateNodeBlockSize', {
+        id: this.nodeID,
+        size: nodeBlockSize
+      })
     }
   }
 }

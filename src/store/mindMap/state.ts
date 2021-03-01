@@ -1,9 +1,13 @@
-export interface ExampleStateInterface {
+export interface MindMapStateInterface {
   prop: boolean;
+  contentSize: object;
+  nodeBlockSize: object;
 }
 
-const state: ExampleStateInterface = {
-  prop: false
+const state: MindMapStateInterface = {
+  prop: false,
+  contentSize: {},
+  nodeBlockSize: {}
 }
 
 export default state

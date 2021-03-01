@@ -9,6 +9,7 @@
             v-bind:db="db"
             v-bind:node="node"
             v-bind:isRoot="true"
+            v-bind:oriTranslate="0"
           ></node>
         </g>
       </svg>
