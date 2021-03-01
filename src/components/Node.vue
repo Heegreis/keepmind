@@ -29,6 +29,7 @@
 <script lang="ts">
 // import { defineComponent, PropType, computed, ref } from '@vue/composition-api'
 import * as d3 from 'd3'
+import TWEEN from '@tweenjs/tween.js'
 import { getRootsID, getNode } from 'components/punchdbTools'
 import { event } from 'quasar'
 // Node排版: 主要用g包裝
@@ -73,8 +74,7 @@ export default {
         })
         .y(function(d) {
           return d.y
-        }),
-      draging: false
+        })
     }
   },
   computed: {
@@ -100,8 +100,10 @@ export default {
       this.data = result
     })
     console.log('created fin')
+    this.translate.y = this.oriTranslate
   },
   mounted: function() {
+    this.tweenAni()
     const drag = d3
       .drag()
       .container(function container() {
@@ -124,9 +126,6 @@ export default {
       size: Object.assign({}, this.size)
     })
     this.updateNodeBlockSize()
-    if (!this.draging) {
-      this.translate.y = this.oriTranslate
-    }
     this.line[0].y = this.size.height / 2
     if (this.parentSize) {
       this.line[1].x = -this.translate.x + this.parentSize.width
@@ -154,6 +153,10 @@ export default {
       //   console.log('showNodeInfo')
       // }
     },
+    tweenAni: function() {
+      requestAnimationFrame(this.tweenAni)
+      TWEEN.update()
+    },
     dragDrag(event, d) {
       this.translate.x += d3.event.dx
       this.translate.y += d3.event.dy
@@ -162,10 +165,18 @@ export default {
         this.line[1].x = -this.translate.x + this.parentSize.width
         this.line[1].y = -this.translate.y + this.parentSize.height / 2
       }
-      this.draging = true
     },
     dragEnd(event, d) {
-      this.draging = false
+      const vm = this
+      const anim = { x: vm.translate.x, y: vm.translate.y }
+      const tween = new TWEEN.Tween(anim)
+        .to({ x: 50, y: vm.oriTranslate }, 500)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .onUpdate(function() {
+          vm.translate.x = anim.x
+          vm.translate.y = anim.y
+        })
+        .start()
     },
     updateNodeBlockSize() {
       let childrenSize = 0
